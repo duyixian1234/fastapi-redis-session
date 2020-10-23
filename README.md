@@ -36,6 +36,14 @@ async def _setSession(
 async def _setSession(session: Any = Depends(getSession)):
     return session
 
+
+ @application.post("/deleteSession")
+async def _deleteSession(
+    sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
+):
+    deleteSession(sessionId, sessionStorage)
+    return None
+
 ```
 
 ## Config
