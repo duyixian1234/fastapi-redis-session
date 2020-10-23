@@ -45,14 +45,16 @@ async def _setSession(session: Any = Depends(getSession)):
 - url of Redis: redis://localhost:6379/0
 - name of sessionId: ssid
 - generator function of sessionId: `lambda :uuid.uuid4().hex`
+- expire time of session in redis: 6 hours
 
 ### Custom Config
 
 ```python
 from fastapi_redis_session.config import basicConfig
 basicConfig(
-        redisURL="redis://localhost:6379/1",
-        sessionIdName="sessionId",
-        sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
+    redisURL="redis://localhost:6379/1",
+    sessionIdName="sessionId",
+    sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
+    expireTime=timedelta(days=1),
     )
 ```

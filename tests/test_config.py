@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi_redis_session.config import basicConfig, config
 import random
 from unittest import mock
@@ -15,9 +16,11 @@ def testBasicConfig():
         redisURL="redis://localhost:6379/1",
         sessionIdName="sessionId",
         sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
+        expireTime=timedelta(days=1),
     )
     assert config.redisURL == "redis://localhost:6379/1"
     assert config.sessionIdName == "sessionId"
     assert config.genSessionId().isnumeric()
+    assert config.expireTime == timedelta(seconds=24 * 3600)
 
-    basicConfig(sessionIdGenerator=origin)
+    basicConfig(sessionIdGenerator=origin, expireTime=timedelta(hours=6))

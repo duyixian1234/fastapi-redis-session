@@ -1,3 +1,3 @@
 from .config import basicConfig
-from .deps import getSession, setSession, getSessionStorage
+from .deps import deleteSession, getSession, getSessionStorage, setSession
 from .session import SessionStorage
