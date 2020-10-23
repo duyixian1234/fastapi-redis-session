@@ -4,9 +4,7 @@ from unittest import mock
 import pytest
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.testclient import TestClient
-from fastapi_redis_session import getSession, setSession, deleteSession
-from fastapi_redis_session.deps import getSessionId, getSessionStorage
-from fastapi_redis_session.session import SessionStorage
+from fastapi_redis_session import SessionStorage, deleteSession, getSession, getSessionId, getSessionStorage, setSession
 from fastapi_redis_session.config import config
 
 
