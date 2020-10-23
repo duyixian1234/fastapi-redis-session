@@ -1,0 +1,73 @@
+[tool.poetry]
+authors = ["duyixian <duyixian1234@qq.com>"]
+description = "A redis-based session backend for Fastapi apps"
+license = "MIT"
+name = "fastapi-redis-session"
+readme = "README.md"
+repository = "https://github.com/duyixian1234/fastapi-redis-session"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+fastapi = "^0.61.1"
+python = "^3.7"
+redis = "^3.5.3"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+coverage = {extras = ["toml"], version = "^5.3"}
+mypy = "^0.790"
+pylint = "^2.6.0"
+pytest = "^6.1.1"
+pytest-cov = "^2.10.1"
+requests = "^2.24.0"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.pylint.master]
+job = 0
+suggestion-mode = "yes"
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.basic]
+argument-naming-style = "any"
+attr-naming-style = "any"
+function-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"
+
+[tool.pylint.message_control]
+disable = ["missing-docstring", "logging-fstring-interpolation"]
+
+[tool.pylint.design]
+min-public-methods = 0
+
+[tool.pytest.ini_options]
+addopts = " -svv --cov=fastapi_redis_session"
+minversion = "6.0"
+testpaths = [
+  "tests",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+]
+fail_under = 30.0
+show_missing = true
+skip_covered = true
+skip_empty = true
+sort = "miss"
+
+[tool.coverage.path]
+source = "fastapi_redis_session"
+
+[tool.black]
+line-length = 120
