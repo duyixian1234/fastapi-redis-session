@@ -1,5 +1,7 @@
 # fastapi-redis-session
 
+![CI](https://github.com/duyixian1234/fastapi-redis-session/workflows/CI/badge.svg?branch=master)
+
 A redis-based session backend for Fastapi apps
 
 ## Install
@@ -34,4 +36,23 @@ async def _setSession(
 async def _setSession(session: Any = Depends(getSession)):
     return session
 
+```
+
+## Config
+
+### Deafult Config
+
+- url of Redis: redis://localhost:6379/0
+- name of sessionId: ssid
+- generator function of sessionId: `lambda :uuid.uuid4().hex`
+
+### Custom Config
+
+```python
+from fastapi_redis_session.config import basicConfig
+basicConfig(
+        redisURL="redis://localhost:6379/1",
+        sessionIdName="sessionId",
+        sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
+    )
 ```
