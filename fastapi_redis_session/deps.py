@@ -21,10 +21,11 @@ def getSessionId(request: Request):
     return sessionId
 
 
-def setSession(response: Response, session: Any, sessionStorage: SessionStorage):
+def setSession(response: Response, session: Any, sessionStorage: SessionStorage) -> str:
     sessionId = sessionStorage.genSessionId()
     sessionStorage[sessionId] = session
     response.set_cookie(config.sessionIdName, sessionId, httponly=True)
+    return sessionId
 
 
 def deleteSession(sessionId: str, sessionStorage: SessionStorage):
