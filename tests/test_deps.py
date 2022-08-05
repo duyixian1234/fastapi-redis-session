@@ -50,8 +50,8 @@ def testDeps(app: FastAPI, sessionStorage):
     sessionStorage.__setitem__.assert_called_once_with(sessionStorage.genSessionId(), dict(a=1, b="data", c=True))
 
     sessionStorage.__getitem__.return_value = dict(a=1, b="data", c=True)
-    client.get("/getSession", cookies={config.sessionIdName: "ssid"})
+    client.get("/getSession", cookies={config().sessionIdName: "ssid"})
     sessionStorage.__getitem__.assert_called_once_with("ssid")
 
-    client.post("/deleteSession", cookies={config.sessionIdName: "ssid"})
+    client.post("/deleteSession", cookies={config().sessionIdName: "ssid"})
     sessionStorage.__delitem__.assert_called_once_with("ssid")
