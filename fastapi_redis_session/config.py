@@ -11,7 +11,7 @@ class Config(BaseSettings):
     expireTime: timedelta
 
     def sessionIdGenerator(self) -> str:
-        return sessionIdGenerator()
+        return self.sessionIdGenerator()
 
 @lru_cache
 def config(
