@@ -12,19 +12,19 @@ def getSessionStorage() -> Generator:
 
 
 def getSession(request: Request, sessionStorage: SessionStorage = Depends(getSessionStorage)):
-    sessionId = request.cookies.get(config.sessionIdName, "")
+    sessionId = request.cookies.get(config().sessionIdName, "")
     return sessionStorage[sessionId]
 
 
 def getSessionId(request: Request):
-    sessionId = request.cookies.get(config.sessionIdName, "")
+    sessionId = request.cookies.get(config().sessionIdName, "")
     return sessionId
 
 
 def setSession(response: Response, session: Any, sessionStorage: SessionStorage) -> str:
     sessionId = sessionStorage.genSessionId()
     sessionStorage[sessionId] = session
-    response.set_cookie(config.sessionIdName, sessionId, httponly=True)
+    response.set_cookie(config().sessionIdName, sessionId, httponly=True)
     return sessionId
 
 

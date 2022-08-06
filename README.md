@@ -56,8 +56,8 @@ async def _deleteSession(
 ### Custom Config
 
 ```python
-from fastapi_redis_session.config import basicConfig
-basicConfig(
+from fastapi_redis_session.config import config
+config = config(
     redisURL="redis://localhost:6379/1",
     sessionIdName="sessionId",
     sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
