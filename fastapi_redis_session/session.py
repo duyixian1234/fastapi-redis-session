@@ -5,10 +5,16 @@ from redis import Redis
 
 from .config import config
 
+try:
+    from importlib.metadata import version as get_version
+except ImportError:
+    from importlib_metadata import version as get_version
+
 
 class SessionStorage:
     def __init__(self):
         self.client = Redis.from_url(config.redisURL)
+        self._add_driver_info(self.client)
 
     def __getitem__(self, key: str):
         raw = self.client.get(key)
@@ -25,3 +31,40 @@ class SessionStorage:
         while self.client.get(sessionId):
             sessionId = config.genSessionId()
         return sessionId
+
+    @staticmethod
+    def _add_driver_info(redis) -> None:
+        """Add driver identification to Redis connection.
+
+        Uses DriverInfo class if available, or falls back to
+        lib_name/lib_version for older versions.
+        """
+        # Get fastapi-redis-session version
+        try:
+            session_version = get_version("fastapi-redis-session")
+        except Exception:
+            session_version = "unknown"
+
+        # Get connection pool from the redis client
+        connection_pool: Any = getattr(redis, "connection_pool", None)
+        if connection_pool is None:
+            return
+
+        # Try to use DriverInfo class
+        try:
+            from redis import DriverInfo
+
+            driver_info = DriverInfo().add_upstream_driver("fastapi-redis-session", session_version)
+            connection_pool.connection_kwargs["driver_info"] = driver_info
+        except (ImportError, AttributeError):
+            # Fallback: use lib_name/lib_version
+            # Format: lib_name='redis-py(fastapi-redis-session_v{version})'
+            connection_pool.connection_kwargs["lib_name"] = f"redis-py(fastapi-redis-session_v{session_version})"
+            # lib_version should be the redis client version
+            try:
+                import redis
+
+                redis_version = redis.__version__
+            except (ImportError, AttributeError):
+                redis_version = "unknown"
+            connection_pool.connection_kwargs["lib_version"] = redis_version
