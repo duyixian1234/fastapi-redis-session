@@ -103,7 +103,12 @@ class TestDriverInfo:
         mock_redis_module = MagicMock()
         mock_redis_module.DriverInfo = mock_driver_info_class
 
-        with patch("fastapi_redis_session.session.get_version", side_effect=Exception("Version not found")):
+        from fastapi_redis_session.session import PackageNotFoundError
+
+        with patch(
+            "fastapi_redis_session.session.get_version",
+            side_effect=PackageNotFoundError("fastapi-redis-session"),
+        ):
             # Temporarily add our mock redis module
             original_redis = sys.modules.get("redis")
             sys.modules["redis"] = mock_redis_module

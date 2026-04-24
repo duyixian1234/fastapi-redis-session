@@ -6,14 +6,17 @@ from redis import Redis
 from .config import config
 
 try:
-    from importlib.metadata import version as get_version
+    from importlib.metadata import PackageNotFoundError, version as get_version
 except ImportError:  # Python < 3.8
     try:
-        from importlib_metadata import version as get_version  # type: ignore
+        from importlib_metadata import PackageNotFoundError, version as get_version  # type: ignore
     except ImportError:
 
+        class PackageNotFoundError(Exception):  # type: ignore
+            pass
+
         def get_version(_name: str) -> str:
-            return "unknown"
+            raise PackageNotFoundError(_name)
 
 
 class SessionStorage:
@@ -47,7 +50,7 @@ class SessionStorage:
         # Get fastapi-redis-session version
         try:
             session_version = get_version("fastapi-redis-session")
-        except Exception:
+        except PackageNotFoundError:
             session_version = "unknown"
 
         # Get connection pool from the redis client
