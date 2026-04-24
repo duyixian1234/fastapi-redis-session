@@ -7,8 +7,13 @@ from .config import config
 
 try:
     from importlib.metadata import version as get_version
-except ImportError:
-    from importlib_metadata import version as get_version
+except ImportError:  # Python < 3.8
+    try:
+        from importlib_metadata import version as get_version  # type: ignore
+    except ImportError:
+
+        def get_version(_name: str) -> str:
+            return "unknown"
 
 
 class SessionStorage:
