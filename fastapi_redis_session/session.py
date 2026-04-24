@@ -33,7 +33,7 @@ class SessionStorage:
         return sessionId
 
     @staticmethod
-    def _add_driver_info(redis) -> None:
+    def _add_driver_info(redis_client) -> None:
         """Add driver identification to Redis connection.
 
         Uses DriverInfo class if available, or falls back to
@@ -46,7 +46,7 @@ class SessionStorage:
             session_version = "unknown"
 
         # Get connection pool from the redis client
-        connection_pool: Any = getattr(redis, "connection_pool", None)
+        connection_pool: Any = getattr(redis_client, "connection_pool", None)
         if connection_pool is None:
             return
 
@@ -62,9 +62,9 @@ class SessionStorage:
             connection_pool.connection_kwargs["lib_name"] = f"redis-py(fastapi-redis-session_v{session_version})"
             # lib_version should be the redis client version
             try:
-                import redis
+                import redis as redis_module
 
-                redis_version = redis.__version__
+                redis_version = redis_module.__version__
             except (ImportError, AttributeError):
                 redis_version = "unknown"
             connection_pool.connection_kwargs["lib_version"] = redis_version
