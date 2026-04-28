@@ -12,6 +12,8 @@ pip install -U fastapi-redis-session
 
 Requires Python 3.12 or newer.
 
+The public API is async-only and uses `redis.asyncio`.
+
 ## Development
 
 ```bash
@@ -36,7 +38,7 @@ async def _setSession(
     request: Request, response: Response, sessionStorage: SessionStorage = Depends(getSessionStorage)
 ):
     sessionData = await request.json()
-    setSession(response, sessionData, sessionStorage)
+    await setSession(response, sessionData, sessionStorage)
 
 
 @app.get("/getSession")
@@ -48,10 +50,18 @@ async def _setSession(session: Any = Depends(getSession)):
 async def _deleteSession(
     sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
 ):
-    deleteSession(sessionId, sessionStorage)
+    await deleteSession(sessionId, sessionStorage)
     return None
 
 ```
+
+`getSession` is an async dependency, and `setSession` / `deleteSession` must be awaited inside async route handlers.
+
+## Migration notes
+
+- `SessionStorage` now uses `redis.asyncio.Redis`.
+- Session access is no longer exposed through sync magic methods; use the async helper functions or awaitable storage methods instead.
+- Existing code that called `setSession(...)` or `deleteSession(...)` without `await` must be updated.
 
 ## Config
 

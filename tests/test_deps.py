@@ -11,10 +11,8 @@ from fastapi_redis_session.config import config
 @pytest.fixture
 def sessionStorage():
     with mock.patch("fastapi_redis_session.deps.SessionStorage") as mockClass:
-        mockStorage = mock.Mock(spec=SessionStorage)
-        mockStorage.__setitem__ = mock.Mock()
-        mockStorage.__getitem__ = mock.Mock()
-        mockStorage.__delitem__ = mock.Mock()
+        mockStorage = mock.AsyncMock(spec=SessionStorage)
+        mockStorage.genSessionId.return_value = "generated-ssid"
         mockClass.return_value = mockStorage
         yield mockStorage
 
@@ -28,7 +26,7 @@ def app(sessionStorage: SessionStorage):
         request: Request, response: Response, sessionStorage: SessionStorage = Depends(getSessionStorage)
     ):
         sessionData = await request.json()
-        setSession(response, sessionData, sessionStorage)
+        await setSession(response, sessionData, sessionStorage)
 
     @application.get("/getSession")
     async def _setSession(session: Any = Depends(getSession)):
@@ -38,7 +36,7 @@ def app(sessionStorage: SessionStorage):
     async def _deleteSession(
         sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
     ):
-        deleteSession(sessionId, sessionStorage)
+        await deleteSession(sessionId, sessionStorage)
         return None
 
     yield application
@@ -47,11 +45,12 @@ def app(sessionStorage: SessionStorage):
 def testDeps(app: FastAPI, sessionStorage):
     client = TestClient(app)
     client.post("/setSession", json=dict(a=1, b="data", c=True))
-    sessionStorage.__setitem__.assert_called_once_with(sessionStorage.genSessionId(), dict(a=1, b="data", c=True))
+    sessionStorage.genSessionId.assert_awaited_once_with()
+    sessionStorage.set.assert_awaited_once_with("generated-ssid", dict(a=1, b="data", c=True))
 
-    sessionStorage.__getitem__.return_value = dict(a=1, b="data", c=True)
+    sessionStorage.get.return_value = dict(a=1, b="data", c=True)
     client.get("/getSession", cookies={config.sessionIdName: "ssid"})
-    sessionStorage.__getitem__.assert_called_once_with("ssid")
+    sessionStorage.get.assert_awaited_once_with("ssid")
 
     client.post("/deleteSession", cookies={config.sessionIdName: "ssid"})
-    sessionStorage.__delitem__.assert_called_once_with("ssid")
+    sessionStorage.delete.assert_awaited_once_with("ssid")

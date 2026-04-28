@@ -1,4 +1,4 @@
-from typing import Any, Generator
+from typing import Any, AsyncGenerator
 
 from fastapi import Depends, Request, Response
 
@@ -6,14 +6,17 @@ from .config import config
 from .session import SessionStorage
 
 
-def getSessionStorage() -> Generator:
+async def getSessionStorage() -> AsyncGenerator[SessionStorage, None]:
     storage = SessionStorage()
-    yield storage
+    try:
+        yield storage
+    finally:
+        await storage.close()
 
 
-def getSession(request: Request, sessionStorage: SessionStorage = Depends(getSessionStorage)):
+async def getSession(request: Request, sessionStorage: SessionStorage = Depends(getSessionStorage)):
     sessionId = request.cookies.get(config.sessionIdName, "")
-    return sessionStorage[sessionId]
+    return await sessionStorage.get(sessionId)
 
 
 def getSessionId(request: Request):
@@ -21,12 +24,12 @@ def getSessionId(request: Request):
     return sessionId
 
 
-def setSession(response: Response, session: Any, sessionStorage: SessionStorage) -> str:
-    sessionId = sessionStorage.genSessionId()
-    sessionStorage[sessionId] = session
+async def setSession(response: Response, session: Any, sessionStorage: SessionStorage) -> str:
+    sessionId = await sessionStorage.genSessionId()
+    await sessionStorage.set(sessionId, session)
     response.set_cookie(config.sessionIdName, sessionId, httponly=True)
     return sessionId
 
 
-def deleteSession(sessionId: str, sessionStorage: SessionStorage):
-    del sessionStorage[sessionId]
+async def deleteSession(sessionId: str, sessionStorage: SessionStorage):
+    await sessionStorage.delete(sessionId)

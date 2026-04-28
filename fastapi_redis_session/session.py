@@ -4,7 +4,7 @@ from importlib.metadata import PackageNotFoundError, version as get_version
 from typing import Any
 
 import redis as redis_module
-from redis import Redis
+from redis.asyncio import Redis
 
 from .config import config
 
@@ -14,21 +14,25 @@ class SessionStorage:
         self.client = Redis.from_url(config.redisURL)
         self._add_driver_info(self.client)
 
-    def __getitem__(self, key: str):
+    async def get(self, key: str):
         raw = self.client.get(key)
+        raw = await raw
         return raw and pickle.loads(raw)
 
-    def __setitem__(self, key: str, value: Any):
-        self.client.set(key, pickle.dumps(value, protocol=pickle.HIGHEST_PROTOCOL), ex=config.expireTime)
+    async def set(self, key: str, value: Any):
+        await self.client.set(key, pickle.dumps(value, protocol=pickle.HIGHEST_PROTOCOL), ex=config.expireTime)
 
-    def __delitem__(self, key: str):
-        self.client.delete(key)
+    async def delete(self, key: str):
+        await self.client.delete(key)
 
-    def genSessionId(self) -> str:
+    async def genSessionId(self) -> str:
         sessionId = config.genSessionId()
-        while self.client.get(sessionId):
+        while await self.client.exists(sessionId):
             sessionId = config.genSessionId()
         return sessionId
+
+    async def close(self) -> None:
+        await self.client.aclose()
 
     @staticmethod
     def _add_driver_info(redis_client) -> None:

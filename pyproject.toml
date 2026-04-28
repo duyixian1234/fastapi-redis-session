@@ -8,7 +8,7 @@ authors = [{ name = "duyixian", email = "duyixian1234@qq.com" }]
 license = "MIT"
 dependencies = [
   "fastapi>=0.70.0,<0.71.0",
-  "redis>=5.0.8,<6.0.0",
+  "redis>=6.0.0,<7.0.0",
 ]
 
 [project.urls]
