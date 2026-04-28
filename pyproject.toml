@@ -1,13 +1,14 @@
 [project]
 name = "fastapi-redis-session"
-version = "0.3.0"
+version = "0.3.1"
 description = "A redis-based session backend for Fastapi apps"
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 authors = [{ name = "duyixian", email = "duyixian1234@qq.com" }]
 license = "MIT"
 dependencies = [
-  "fastapi>=0.70.0,<0.71.0",
+  "fastapi>=0.107.0,<1.0.0",
+  "pydantic-settings>=2.6.1,<3.0.0",
   "redis>=6.0.0,<7.0.0",
 ]
 
@@ -18,6 +19,7 @@ Repository = "https://github.com/duyixian1234/fastapi-redis-session"
 dev = [
   "black>=24.8.0,<25.0.0",
   "coverage[toml]>=7.6.0,<8.0.0",
+  "httpx>=0.27.0,<1.0.0",
   "mypy>=1.11.2,<2.0.0",
   "pylint>=3.2.7,<4.0.0",
   "pytest>=8.3.3,<9.0.0",

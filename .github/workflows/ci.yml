@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +28,35 @@ jobs:
 
       - name: Check type
         run: uv run mypy fastapi_redis_session
+
+      - name: Test with pytest
+        run: uv run pytest
+
+      - name: Prune uv cache
+        run: uv cache prune --ci
+
+  fastapi-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fastapi-version: ["0.107.0", "0.110.3", "0.136.1"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.8"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev
+
+      - name: Install FastAPI ${{ matrix.fastapi-version }}
+        run: uv pip install --reinstall "fastapi==${{ matrix.fastapi-version }}"
 
       - name: Test with pytest
         run: uv run pytest
