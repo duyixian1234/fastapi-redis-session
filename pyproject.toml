@@ -1,6 +1,6 @@
 [project]
 name = "fastapi-redis-session"
-version = "0.2.0"
+version = "0.3.0"
 description = "A redis-based session backend for Fastapi apps"
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
