@@ -57,6 +57,98 @@ async def _deleteSession(
 
 `getSession` is an async dependency, and `setSession` / `deleteSession` must be awaited inside async route handlers.
 
+## Example app
+
+Here is a minimal runnable FastAPI example with:
+
+- `POST /login`: log in and write a session
+- `GET /me`: read the current user from the session
+
+The example assumes Redis is available locally at `redis://localhost:6379/0`.
+
+```python
+from typing import Any
+
+from fastapi import Depends, FastAPI, HTTPException, Response, status
+from pydantic import BaseModel
+
+from fastapi_redis_session import SessionStorage, getSession, getSessionStorage, setSession
+from fastapi_redis_session.config import basicConfig
+
+basicConfig(redisURL="redis://localhost:6379/0", sessionIdName="ssid")
+
+app = FastAPI(title="fastapi-redis-session example")
+
+FAKE_USER = {
+    "username": "alice",
+    "password": "secret123",
+    "name": "Alice",
+    "email": "alice@example.com",
+}
+
+
+class LoginBody(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/login")
+async def login(
+    body: LoginBody,
+    response: Response,
+    sessionStorage: SessionStorage = Depends(getSessionStorage),
+):
+    if body.username != FAKE_USER["username"] or body.password != FAKE_USER["password"]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid username or password")
+
+    user = {
+        "username": FAKE_USER["username"],
+        "name": FAKE_USER["name"],
+        "email": FAKE_USER["email"],
+    }
+    session_id = await setSession(response, user, sessionStorage)
+    return {"message": "login success", "session_id": session_id, "user": user}
+
+
+@app.get("/me")
+async def me(session: Any = Depends(getSession)):
+    if not session:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="not logged in")
+    return session
+```
+
+Save it as `example.py`, then run:
+
+```bash
+uvicorn example:app --reload
+```
+
+Test it with `curl`:
+
+1. Log in and save the cookie
+
+```bash
+curl -i \
+  -X POST http://127.0.0.1:8000/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"alice","password":"secret123"}' \
+  -c cookies.txt
+```
+
+2. Use the cookie to fetch the current user
+
+```bash
+curl -i \
+  http://127.0.0.1:8000/me \
+  -b cookies.txt
+```
+
+3. Test `/me` without logging in
+
+```bash
+curl -i http://127.0.0.1:8000/me
+```
+
 ## Migration notes
 
 - `SessionStorage` now uses `redis.asyncio.Redis`.
