@@ -10,6 +10,15 @@ A redis-based session backend for Fastapi apps
 pip install -U fastapi-redis-session
 ```
 
+Requires Python 3.12 or newer.
+
+## Development
+
+```bash
+uv sync --group dev
+uv run pytest
+```
+
 ## Use
 
 ```python

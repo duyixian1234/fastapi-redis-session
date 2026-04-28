@@ -1,29 +1,36 @@
-[tool.poetry]
-authors = ["duyixian <duyixian1234@qq.com>"]
-description = "A redis-based session backend for Fastapi apps"
-license = "MIT"
+[project]
 name = "fastapi-redis-session"
-readme = "README.md"
-repository = "https://github.com/duyixian1234/fastapi-redis-session"
 version = "0.2.0"
+description = "A redis-based session backend for Fastapi apps"
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+authors = [{ name = "duyixian", email = "duyixian1234@qq.com" }]
+license = "MIT"
+dependencies = [
+  "fastapi>=0.70.0,<0.71.0",
+  "redis>=5.0.8,<6.0.0",
+]
 
-[tool.poetry.dependencies]
-fastapi = "^0.70.0"
-python = "^3.7"
-redis = "^3.5.3"
+[project.urls]
+Repository = "https://github.com/duyixian1234/fastapi-redis-session"
 
-[tool.poetry.dev-dependencies]
-black = "^20.8b1"
-coverage = {extras = ["toml"], version = "^5.3"}
-mypy = "^0.790"
-pylint = "^2.6.0"
-pytest = "^6.1.1"
-pytest-cov = "^2.10.1"
-requests = "^2.24.0"
+[dependency-groups]
+dev = [
+  "black>=24.8.0,<25.0.0",
+  "coverage[toml]>=7.6.0,<8.0.0",
+  "mypy>=1.11.2,<2.0.0",
+  "pylint>=3.2.7,<4.0.0",
+  "pytest>=8.3.3,<9.0.0",
+  "pytest-cov>=5.0.0,<6.0.0",
+  "requests>=2.32.3,<3.0.0",
+]
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["fastapi_redis_session"]
 
 [tool.pylint.master]
 job = 0

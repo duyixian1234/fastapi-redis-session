@@ -1,22 +1,12 @@
 import pickle
+import sys
+from importlib.metadata import PackageNotFoundError, version as get_version
 from typing import Any
 
+import redis as redis_module
 from redis import Redis
 
 from .config import config
-
-try:
-    from importlib.metadata import PackageNotFoundError, version as get_version
-except ImportError:  # Python < 3.8
-    try:
-        from importlib_metadata import PackageNotFoundError, version as get_version  # type: ignore
-    except ImportError:
-
-        class PackageNotFoundError(Exception):  # type: ignore
-            pass
-
-        def get_version(_name: str) -> str:
-            raise PackageNotFoundError(_name)
 
 
 class SessionStorage:
@@ -58,11 +48,15 @@ class SessionStorage:
         if connection_pool is None:
             return
 
+        active_redis_module = sys.modules.get("redis", redis_module)
+
         # Try to use DriverInfo class
         try:
-            from redis import DriverInfo
+            driver_info_cls = getattr(active_redis_module, "DriverInfo", None)
+            if not callable(driver_info_cls):
+                raise AttributeError
 
-            driver_info = DriverInfo().add_upstream_driver("fastapi-redis-session", session_version)
+            driver_info = driver_info_cls().add_upstream_driver("fastapi-redis-session", session_version)
             connection_pool.connection_kwargs["driver_info"] = driver_info
         except (ImportError, AttributeError):
             # Fallback: use lib_name/lib_version
@@ -70,9 +64,7 @@ class SessionStorage:
             connection_pool.connection_kwargs["lib_name"] = f"redis-py(fastapi-redis-session_v{session_version})"
             # lib_version should be the redis client version
             try:
-                import redis as redis_module
-
-                redis_version = redis_module.__version__
+                redis_version = active_redis_module.__version__
             except (ImportError, AttributeError):
                 redis_version = "unknown"
             connection_pool.connection_kwargs["lib_version"] = redis_version
